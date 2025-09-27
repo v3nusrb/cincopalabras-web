@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/cincopalabras-web/sw.js', { scope: '/cincopalabras-web/' })})}
