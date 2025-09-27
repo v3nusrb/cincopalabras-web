@@ -11,6 +11,7 @@ export function Test() {
   const [test, setTest] = useState<TestQuestion[]>([])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
+  const [submittedAnswer, setSubmittedAnswer] = useState<string | null>(null)
   const [testResults, setTestResults] = useState<TestSession[]>([])
   const [isTestCompleted, setIsTestCompleted] = useState(false)
   const [isLoadingTest, setIsLoadingTest] = useState(true)
@@ -37,22 +38,28 @@ export function Test() {
   }, [currentLesson])
 
   const handleAnswerSelect = (answer: string) => {
+    if (submittedAnswer) return // Don't allow changing answer after submission
     setSelectedAnswer(answer)
   }
 
+  const handleAnswerSubmit = () => {
+    if (!selectedAnswer) return
+    setSubmittedAnswer(selectedAnswer)
+  }
+
   const handleNextQuestion = async () => {
-    if (!selectedAnswer || !currentLesson) return
+    if (!submittedAnswer || !currentLesson) return
 
     const currentQuestion = test[currentQuestionIndex]
     const timeSpent = Date.now() - questionStartTime
-    const isCorrect = selectedAnswer === currentQuestion.correctAnswer
+    const isCorrect = submittedAnswer === currentQuestion.correctAnswer
 
     // Save test result
     const testResult: Omit<TestSession, 'id'> = {
       lessonId: currentLesson.id,
       wordId: currentQuestion.wordId,
       correctAnswer: currentQuestion.correctAnswer,
-      userAnswer: selectedAnswer,
+      userAnswer: submittedAnswer,
       isCorrect,
       timeSpent,
       createdAt: new Date()
@@ -63,13 +70,14 @@ export function Test() {
       currentLesson.id,
       currentQuestion.wordId,
       currentQuestion.correctAnswer,
-      selectedAnswer,
+      submittedAnswer,
       timeSpent
     )
 
     if (currentQuestionIndex < test.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1)
       setSelectedAnswer(null)
+      setSubmittedAnswer(null)
       setQuestionStartTime(Date.now())
     } else {
       // Test completed
@@ -81,6 +89,7 @@ export function Test() {
   const handleRestart = () => {
     setCurrentQuestionIndex(0)
     setSelectedAnswer(null)
+    setSubmittedAnswer(null)
     setTestResults([])
     setIsTestCompleted(false)
     setQuestionStartTime(Date.now())
@@ -192,19 +201,38 @@ export function Test() {
             </p>
             
             <div className="space-y-3">
-              {currentQuestion.options.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleAnswerSelect(option)}
-                  className={`w-full py-3 px-4 rounded-lg border-2 transition-colors ${
-                    selectedAnswer === option
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
+              {currentQuestion.options.map((option, index) => {
+                let buttonClass = 'w-full py-3 px-4 rounded-lg border-2 transition-colors '
+                
+                if (submittedAnswer) {
+                  // After submission, show correct/incorrect colors
+                  if (option === currentQuestion.correctAnswer) {
+                    buttonClass += 'border-green-500 bg-green-50 text-green-700'
+                  } else if (option === submittedAnswer && option !== currentQuestion.correctAnswer) {
+                    buttonClass += 'border-red-500 bg-red-50 text-red-700'
+                  } else {
+                    buttonClass += 'border-gray-200 bg-gray-50 text-gray-500'
+                  }
+                } else {
+                  // Before submission, normal selection
+                  if (selectedAnswer === option) {
+                    buttonClass += 'border-blue-500 bg-blue-50 text-blue-700'
+                  } else {
+                    buttonClass += 'border-gray-200 hover:border-gray-300 text-gray-700'
+                  }
+                }
+                
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswerSelect(option)}
+                    className={buttonClass}
+                    disabled={submittedAnswer !== null}
+                  >
+                    {option}
+                  </button>
+                )
+              })}
             </div>
           </div>
         </div>
@@ -212,17 +240,31 @@ export function Test() {
 
       {/* Navigation */}
       <div className="flex justify-center">
-        <button
-          onClick={handleNextQuestion}
-          disabled={!selectedAnswer}
-          className={`px-8 py-3 rounded-lg font-medium transition-colors ${
-            selectedAnswer
-              ? 'bg-green-600 text-white hover:bg-green-700'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          {currentQuestionIndex < test.length - 1 ? 'Следующий вопрос' : 'Завершить тест'}
-        </button>
+        {!submittedAnswer ? (
+          <button
+            onClick={handleAnswerSubmit}
+            disabled={!selectedAnswer}
+            className={`px-8 py-3 rounded-lg font-medium transition-colors ${
+              selectedAnswer
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            Проверить ответ
+          </button>
+        ) : (
+          <button
+            onClick={handleNextQuestion}
+            disabled={submittedAnswer !== currentQuestion.correctAnswer}
+            className={`px-8 py-3 rounded-lg font-medium transition-colors ${
+              submittedAnswer === currentQuestion.correctAnswer
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            {currentQuestionIndex < test.length - 1 ? 'Следующий вопрос' : 'Завершить тест'}
+          </button>
+        )}
       </div>
     </div>
   )
