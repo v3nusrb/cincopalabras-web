@@ -40,10 +40,20 @@ export async function initializeSettings(): Promise<void> {
 // Seed words from the JSON file
 export async function seedWords(): Promise<void> {
   const wordCount = await db.words.count()
+  console.log(`Current word count in database: ${wordCount}`)
+  
   if (wordCount === 0) {
     try {
-      const response = await fetch('/words_full.json')
+      console.log('Attempting to fetch words_full.json...')
+      const response = await fetch('./words_full.json')
+      console.log('Response status:', response.status)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
       const wordsData = await response.json()
+      console.log('Words data loaded:', wordsData.length, 'words')
       
       const words: Omit<Word, 'id'>[] = wordsData.map((word: any) => ({
         spanish: word.spanish || '',
@@ -58,6 +68,8 @@ export async function seedWords(): Promise<void> {
     } catch (error) {
       console.error('Failed to seed words:', error)
     }
+  } else {
+    console.log('Words already seeded, skipping...')
   }
 }
 
