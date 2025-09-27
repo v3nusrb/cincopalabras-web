@@ -1,5 +1,6 @@
 import Dexie, { Table } from 'dexie'
 import { Word, Lesson, TestSession, Settings } from '../types'
+import { wordsData } from '../data/words'
 
 export class CincoPalabrasDB extends Dexie {
   words!: Table<Word>
@@ -37,23 +38,14 @@ export async function initializeSettings(): Promise<void> {
   }
 }
 
-// Seed words from the JSON file
+// Seed words from embedded data
 export async function seedWords(): Promise<void> {
   const wordCount = await db.words.count()
   console.log(`Current word count in database: ${wordCount}`)
   
   if (wordCount === 0) {
     try {
-      console.log('Attempting to fetch words_full.json...')
-      const response = await fetch('./words_full.json')
-      console.log('Response status:', response.status)
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      const wordsData = await response.json()
-      console.log('Words data loaded:', wordsData.length, 'words')
+      console.log('Seeding words from embedded data...')
       
       const words: Omit<Word, 'id'>[] = wordsData.map((word: any) => ({
         spanish: word.spanish || '',
