@@ -21,10 +21,16 @@ export async function ensureLessonForToday(forceNext: boolean = false): Promise<
     lessons.flatMap(lesson => lesson.wordIds)
   )
   
-  const availableWords = await db.words
-    .where('id')
-    .noneOf(usedWordIds)
-    .toArray()
+  // If no words have been used yet, get all words
+  let availableWords
+  if (usedWordIds.length === 0) {
+    availableWords = await db.words.toArray()
+  } else {
+    availableWords = await db.words
+      .where('id')
+      .noneOf(usedWordIds)
+      .toArray()
+  }
 
   if (availableWords.length === 0) {
     throw new Error('No more words available for lessons')
