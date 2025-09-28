@@ -5,8 +5,16 @@ import { LoadingSpinner } from '../components/LoadingSpinner'
 export function Menu() {
   const { currentLesson, isLoading, error, nextDay } = useApp()
 
+  // Debug info
+  console.log('Menu render:', { currentLesson, isLoading, error })
+
   if (isLoading) {
-    return <LoadingSpinner />
+    return (
+      <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Загрузка...</p>
+      </div>
+    )
   }
 
   if (error) {
@@ -14,6 +22,32 @@ export function Menu() {
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
         <h2 className="text-lg font-semibold text-red-800 mb-2">Ошибка</h2>
         <p className="text-red-600">{error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+        >
+          Перезагрузить
+        </button>
+      </div>
+    )
+  }
+
+  // If no lesson available, show a simple message
+  if (!currentLesson) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          Нет урока на сегодня
+        </h2>
+        <p className="text-gray-600 mb-4">
+          Попробуйте перейти к следующему дню
+        </p>
+        <button
+          onClick={nextDay}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Следующий день
+        </button>
       </div>
     )
   }
