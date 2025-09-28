@@ -72,3 +72,6 @@ export function getNotificationLimitations(): string[] {
     'iOS Safari: Notification scheduling may not work reliably in background'
   ]
 }
+
+
+

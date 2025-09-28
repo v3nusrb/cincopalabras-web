@@ -100,3 +100,6 @@ export const wordsData = [
   {"spanish": "derecho", "transcription": "дэрэ́чо", "russian": "право"},
   {"spanish": "música", "transcription": "му́сика", "russian": "музыка"}
 ]
+
+
+

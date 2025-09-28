@@ -44,3 +44,6 @@ export async function updateTheme(theme: 'light' | 'dark' | 'auto'): Promise<voi
 export async function updateLanguage(language: 'ru' | 'en'): Promise<void> {
   await updateSettings({ language })
 }
+
+
+

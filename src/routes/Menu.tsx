@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { useApp } from '../hooks/useApp'
-import { LoadingSpinner } from '../components/LoadingSpinner'
 
 export function Menu() {
   const { currentLesson, isLoading, error, nextDay } = useApp()

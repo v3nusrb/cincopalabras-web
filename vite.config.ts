@@ -53,8 +53,11 @@ export default defineConfig({
       }
     })
   ],
-  base: '/cincopalabras-web/',
+  base: '/',
   build: {
     outDir: 'dist'
   }
 })
+
+
+
