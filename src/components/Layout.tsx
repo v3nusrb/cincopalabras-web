@@ -46,12 +46,7 @@ export function Layout({ children }: LayoutProps) {
         {children}
       </main>
 
-      <footer className="bg-white border-t border-gray-200 mt-8">
-        <div className="max-w-md mx-auto px-4 py-4 text-center text-sm text-gray-600">
-          <p>Новые слова появляются каждый день.</p>
-          <p>Хочешь узнать больше слов уже сегодня?</p>
-        </div>
-      </footer>
     </div>
   )
 }
+
